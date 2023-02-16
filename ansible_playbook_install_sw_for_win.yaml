@@ -1,0 +1,69 @@
+---
+- name: Create SW Directory
+  hosts: windows
+  tasks:
+    - name: Read variables
+      include_vars: windows_variables.yml
+      tags: always
+
+    - name: Get current date and time
+      delegate_to: localhost
+      shell: "date +%Y-%m-%d%H-%M-%S"
+      register: tstamp
+      tags: always
+
+    - name: Set variable for folder name
+      set_fact:
+        current_date: "{{ tstamp.stdout[0:10]}}"
+      tags: always
+
+
+    - name: Create SW Directory on windows host
+      win_file:
+        path: C:\WIN_SW\{{ current_date }}
+        state: directory
+      tags: always
+
+- name: Download Windows SW
+  hosts: windows
+  tasks:
+
+   - name: Download SW
+     win_get_url:
+       force_basic_auth: True
+       url: "{{ software_url.base_url }}{{ software_url.windows_sw_name }}"
+       url_username: "{{ url_credentials.username }}"
+       url_password: "{{ url_credentials.password }}"
+       dest: C:\WIN_SW\{{ current_date }}\
+       force: "yes"
+     tags:
+        - win_sw_name
+        - all
+
+- name: Install Windows SW
+  hosts: windows
+  tasks:
+
+    - name: Install Windows SW from specified directory
+      win_package:
+          path: C:\WIN_SW\{{ current_date }}\{{ software_url.windows_sw_name }}
+          product_id: "product_id"
+          arguments: /S /install /silent
+          state: present
+      tags:
+          - win_sw_name
+          - all
+
+- name: Uninstall Windows SW
+  hosts: windows
+  tasks:
+
+    - name: Uninstall Windows SW from specified repository
+      win_package:
+          path: C:\WIN_SW\{{ current_date }}\{{ windows_sw_name }}
+          product_id: "product_id"
+          arguments: /S
+          state: absent
+      tags:
+          - win_sw_name
+          - uninstall

@@ -1,0 +1,6 @@
+url_credentials:
+  username: username
+  password: password
+software_url:
+  base_url: http://example.com/
+  windows_sw_name: sw_name
