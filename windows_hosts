@@ -1,0 +1,13 @@
+[ansible_host]
+localhost ansible_connection=local
+
+[windows]
+dest_windows_host_ip
+
+[windows:vars]
+ansible_port=5985
+ansible_connection=winrm
+ansible_user=windows_user
+ansible_password=windows_user_password
+ansible_winrm_server_cert_validation=ignore
+ansible_winrm_transport=basic
